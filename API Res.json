@@ -1,0 +1,47 @@
+{
+    "data": {
+        "success": true,
+        "data": {
+            "imageUrl": "https://arweave.net/85mNbXXBhEuMGa9a56rBmLNdJjC5pSZ6GEFYFipRK9A",
+            "metadataUri": "https://arweave.net/l43NA-wwcf-RvJYYhEnklWumGlebcL0hT5qlfls3uyY"
+        }
+    },
+    "status": 200,
+    "statusText": "OK",
+    "headers": {
+        "content-length": "182",
+        "content-type": "application/json; charset=utf-8"
+    },
+    "config": {
+        "transitional": {
+            "silentJSONParsing": true,
+            "forcedJSONParsing": true,
+            "clarifyTimeoutError": false
+        },
+        "adapter": [
+            "xhr",
+            "http",
+            "fetch"
+        ],
+        "transformRequest": [
+            null
+        ],
+        "transformResponse": [
+            null
+        ],
+        "timeout": 0,
+        "xsrfCookieName": "XSRF-TOKEN",
+        "xsrfHeaderName": "X-XSRF-TOKEN",
+        "maxContentLength": -1,
+        "maxBodyLength": -1,
+        "env": {},
+        "headers": {
+            "Accept": "application/json, text/plain, */*",
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        "method": "post",
+        "url": "http://localhost:3000/upload",
+        "data": {}
+    },
+    "request": {}
+}

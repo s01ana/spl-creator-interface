@@ -4,6 +4,31 @@
 
 body {
   font-family: Arial, Helvetica, sans-serif;
+  text-color: white;
+}
+
+.bg_glass {
+  background: linear-gradient(#ffffff18, #ffffff18);
+}
+
+.bg_dark {
+  background-color: #ffffff14;
+}
+
+.wallet-adapter-button-trigger {
+  background-color: #9333ea;
+}
+
+.wallet-adapter-button {
+  border-radius: calc(0.5rem - 2px);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  height: 2.5rem;
 }
 
 @layer utilities {
