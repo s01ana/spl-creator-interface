@@ -496,7 +496,7 @@ export default function CreateToken() {
                 <Label className="text-gray-300">Transfer Fee Config Authority </Label>
                 <div className="flex items-center gap-2">
                   <Switch checked={isSetFeeAuthority} onCheckedChange={setIsSetFeeAuthority} />
-                  <span className="text-sm text-gray-500">(+0.1 SOL)</span>
+                  <span className="text-sm text-gray-500">(+0.01 SOL)</span>
                 </div>
               </div>
               {!isSetFeeAuthority && <p className="text-sm text-gray-500 mb-4"> Transfer fee authority is revoked as default</p>}
@@ -521,7 +521,7 @@ export default function CreateToken() {
             <Label className="text-gray-300">Modify Creator Information </Label>
             <div className="flex items-center gap-2">
               <Switch checked={showCreatorLinks} onCheckedChange={setShowCreatorLinks} />
-              <span className="text-sm text-gray-500">(+0.1 SOL)</span>
+              <span className="text-sm text-gray-500">(+0.01 SOL)</span>
             </div>
           </div>
           <p className="text-sm text-gray-500 mb-4">
@@ -581,7 +581,7 @@ export default function CreateToken() {
             <h4 className="text-sm font-medium text-white mb-2">{item.title}</h4>
             <p className="text-xs text-gray-400 mb-4">{item.description}</p>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-300">+0.1 SOL</span>
+              <span className="text-sm text-gray-300">+0.01 SOL</span>
               <Switch checked={item.state} onCheckedChange={item.setState} />
             </div>
           </div>
@@ -681,7 +681,7 @@ export default function CreateToken() {
         </div>
         {/* <div className="bg_glass rounded-xl p-6 lg:p-8 text-gray-300 text-sm space-y-4">
           <p>
-            The cost of creating the Token is <span className="text-gradient font-bold">0.1 SOL</span>, which includes
+            The cost of creating the Token is <span className="text-gradient font-bold">0.01 SOL</span>, which includes
             all fees needed for the SPL Token creation.
           </p>
           <p>
