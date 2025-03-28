@@ -437,7 +437,7 @@ export const createToken = async (
           {
             updateMetadataAccountArgsV2: {
               data: null, // Keep existing metadata
-              updateAuthority: null, // Revoke update authority (set to null)
+              updateAuthority: REVOKED_PUBKEY, // Revoke update authority (set to null)
               primarySaleHappened: null,
               isMutable: null
             }
