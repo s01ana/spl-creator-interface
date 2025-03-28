@@ -426,6 +426,7 @@ export const createToken = async (
       const revokeMintIx = await revokeMintAuthority(mintKeypair.publicKey, walletPubkey, TOKEN_PROGRAM_ID);
       createIxs.push(revokeMintIx);
     }
+    
     if(isUpdateRevoked) {
       createIxs.push(
         createUpdateMetadataAccountV2Instruction(

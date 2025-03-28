@@ -78,7 +78,7 @@ export default function RootLayout({
                 </div>
               </div> */}
               <div className="border-t border-gray-800 pt-8 text-center text-gray-500">
-                ©2025 ???. All Rights Reserved.
+                ©2025 All Rights Reserved.
               </div>
             </footer>
             <Toaster position="top-right" reverseOrder={false} />
