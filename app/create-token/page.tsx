@@ -20,13 +20,11 @@ import { WalletButton } from "@/components/solana/solana-provider";
 import { transcode } from "buffer";
 import jwt from 'jsonwebtoken';
 import axios from "axios";
-import { PinataSDK } from "pinata";
+import Arweave from "arweave";
+import { arweaveWallet } from "./constant";
 
 export default function CreateToken() {
-  const pinata = new PinataSDK({
-    pinataJwt: process.env.NEXT_PUBLIC_JWT,
-    pinataGateway: "ctnc.mypinata.cloud",
-  });
+  const arweave = Arweave.init({})
   const { publicKey, sendTransaction, signTransaction, connected } =
     useWallet();
   const [txSignature, setTxSignature] = useState("");
@@ -65,61 +63,78 @@ export default function CreateToken() {
     creatorSite: "",
   });
 
-    // New state for SPL Token 2022 specific fields
-    const [token2022Data, setToken2022Data] = useState({
-      ...tokenData,
-      transferFee: 0,
-      maxFee: 0,
-      authorityWallet: "",
-      withdrawAuthority: "",
-    })
+  // New state for SPL Token 2022 specific fields
+  const [token2022Data, setToken2022Data] = useState({
+    ...tokenData,
+    transferFee: 0,
+    maxFee: 0,
+    authorityWallet: "",
+    withdrawAuthority: "",
+  })
 
-    const [activeTab, setActiveTab] = useState("standard")
+  const [activeTab, setActiveTab] = useState("standard")
 
-    const [pending, setPending] = useState(false)
+  const [pending, setPending] = useState(false)
 
-    const handleUploadImage = async () => {
+  const handleUploadImage = async () => {
+    // const formData = new FormData();
+    // formData.append('file', selectedFile as Blob);
 
-      const formData = new FormData();
-      formData.append('file', selectedFile as Blob);
-    
-      try {
-        // const response = await axios.post('https://uploads.pinata.cloud/v3/files', formData, {
-        //   headers: {
-        //     'Authorization': `Bearer ${process.env.NEXT_PUBLIC_JWT}`,
-        //     'Content-Type': 'multipart/form-data',
-        //   },
-        // });
-        if (!selectedFile) {
-          throw new Error("No file selected for upload");
-        }
-        const upload = await pinata.upload.public.file(selectedFile as File);
-        console.log('File uploaded successfully:', upload);
-        return `https://ctnc.mypinata.cloud/ipfs/${upload.cid}/`
-      } catch (error: any) {
-        console.error('Error uploading file:', error.response?.data || error.message);
-      }
-    };
+    try {
+      // const response = await axios.post('https://api.pinata.cloud/pinning/pinFileToIPFS', formData, {
+      //   headers: {
+      //     'Authorization': `Bearer ${process.env.NEXT_PUBLIC_JWT}`,
+      //     'Content-Type': 'multipart/form-data',
+      //   },
+      // });
 
-    const handleMetadataUri = async (metadata: any) => {
-      try {
-        // const response = await axios.post('https://uploads.pinata.cloud/v3/files', metadata, {
-        //   headers: {
-        //     'Authorization': `Bearer ${process.env.NEXT_PUBLIC_JWT}`,
-        //     'Content-Type': 'application/json',
-        //   },
-        // });
+      let transaction = await arweave.createTransaction({
+        data: await (selectedFile as Blob).arrayBuffer(),
+      });
+  
+      transaction.addTag('Content-Type', selectedFile?.type || 'image/png');
+      console.log(selectedFile?.type)
+      await arweave.transactions.sign(transaction, arweaveWallet);
+  
+      const fileUploadResponse = await arweave.transactions.post(transaction);
 
-        const upload = await pinata.upload.public.json({
-          content: metadata,
-          name: "metadata",
-          lang: "json"
-      })
-    
-        console.log('Metadata uploaded successfully:', upload);
-        return `https://ctnc.mypinata.cloud/ipfs/${upload.cid}`
-      } catch (error: any) {
-        console.error('Error uploading metadata:', error.response?.data || error.message);
+      if (fileUploadResponse.status !== 200) throw new Error("File upload failed!");
+
+      console.log('File uploaded successfully:', transaction.id);
+      return `https://arweave.net/${transaction.id}`
+    } catch (error: any) {
+      console.error('Error uploading file:', error.response?.data || error.message);
+    }
+  };
+
+  const handleMetadataUri = async (metadata: any) => {
+    try {
+      // const response = await axios.post('https://api.pinata.cloud/pinning/pinJSONToIPFS', metadata, {
+      //   headers: {
+      //     'Authorization': `Bearer ${process.env.NEXT_PUBLIC_JWT}`,
+      //     'Content-Type': 'application/json',
+      //   },
+      // });
+
+      let transaction = await arweave.createTransaction({
+        data: JSON.stringify(metadata),
+      });
+  
+      transaction.addTag('Content-Type', 'application/json');
+      console.log(selectedFile?.type)
+      await arweave.transactions.sign(transaction, arweaveWallet);
+  
+      const fileUploadResponse = await arweave.transactions.post(transaction);
+
+      if (fileUploadResponse.status !== 200) throw new Error("Metadata upload failed!");
+
+      console.log('File uploaded successfully:', transaction.id);
+      return `https://arweave.net/${transaction.id}`
+  
+      // console.log('Metadata uploaded successfully:', response.data);
+      // return `https://ipfs.io/ipfs/${response.data.IpfsHash}`
+    } catch (error: any) {
+      console.error('Error uploading metadata:', error.response?.data || error.message);
     }
   }
   const handleFileChange = async (
