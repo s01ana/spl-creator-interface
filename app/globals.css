@@ -16,19 +16,37 @@ body {
 }
 
 .wallet-adapter-button-trigger {
-  background-color: #9333ea;
+  background-color: #22d3ee !important;
+  color: #000000 !important;
+  font-weight: 700 !important;
 }
 
 .wallet-adapter-button {
-  border-radius: calc(0.5rem - 2px);
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  font-weight: 500;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  height: 2.5rem;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-family: Poppins, sans-serif !important;
+  font-size: 16px;
+  /* font-weight: 400 !important; */
+  height: 48px;
+  line-height: 48px;
+  padding: 0 24px;
+  border-radius: 16px !important;
+}
+
+.wallet-adapter-button:not([disabled]):hover {
+  background-color: #1a282e;
+  /* color: white !important; */
+}
+
+.wallet-adapter-dropdown-list-item:not([disabled]):hover {
+  background-color: #004b6e7e !important;
+}
+
+.wallet-adapter-dropdown-list {
+  background: #00719422 !important;
 }
 
 @layer utilities {

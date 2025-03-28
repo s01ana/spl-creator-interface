@@ -58,7 +58,7 @@ export default function CreateToken() {
     updateIsChecked,
     showSocialLinks,
   ].filter(Boolean).length;
-  let solAmount = checkedFlags > 0 ? checkedFlags * FEE_AMOUNT : 0;
+  let solAmount = checkedFlags > 0 ? (checkedFlags + 1) * FEE_AMOUNT : 0.1;
 
   const [creatorData, setCreatorData] = useState({
     creatorName: "",
@@ -208,7 +208,7 @@ export default function CreateToken() {
       updateIsChecked,
       showSocialLinks,
     ].filter(Boolean).length;
-    let solAmount = checkedFlags > 0 ? checkedFlags * FEE_AMOUNT : 0;
+    let solAmount = checkedFlags > 0 ? (checkedFlags + 1) * FEE_AMOUNT : 0.1;
 
     // if (checkedFlags === 1) solAmount = FEE_AMOUNT; // One flag checked
     // else if (checkedFlags === 2)
@@ -672,7 +672,7 @@ export default function CreateToken() {
             )}
             {!connected && <WalletButton className="flex bg-purple-600 hover:bg-purple-700" />}
           </div>
-          <div className="mt-4 flex justify-center text-white font-medium">Total Fees: &nbsp;{solAmount > 0 && <span className="text-gray-500 line-through">{solAmount * 2} SOL</span>}&nbsp;{solAmount} SOL</div>
+          <div className="mt-4 flex justify-center text-white font-medium">Total Fees: &nbsp;{solAmount > 0 && <span className="text-gray-500 line-through">{(solAmount * 2).toLocaleString()} SOL</span>}&nbsp;{solAmount.toLocaleString()} SOL</div>
         </>
       )}
 
