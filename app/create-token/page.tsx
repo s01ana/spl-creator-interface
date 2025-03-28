@@ -85,28 +85,27 @@ export default function CreateToken() {
       symbol: tokenData.symbol,
       decimals: tokenData.decimals,
       supply: tokenData.supply,
-      description: tokenData.description,
-      creator: creatorData
+      description: tokenData.description
     }
 
-    const metaDataWithSocial = {
-      name: tokenData.name,
-      symbol: tokenData.symbol,
-      decimals: tokenData.decimals,
-      supply: tokenData.supply,
-      description: tokenData.description,
-      // image: imageUrl,
+    const metaDataWithSocial = showSocialLinks ? {
+      ...metaData,
       website: tokenData.website,
       twitter: tokenData.twitter,
       telegram: tokenData.telegram,
       discord: tokenData.discord,
+    } : metaData
+
+    const metaDataWithSocialAndCreator = showCreatorLinks ? {
+      ...metaDataWithSocial,
       creator: creatorData
-    }
+    } : metaDataWithSocial
+
     const formData = new FormData();
     formData.append("file", selectedFile as Blob);
-    formData.append("metadata", JSON.stringify(showSocialLinks ? metaDataWithSocial : metaData));
+    formData.append("metadata", JSON.stringify(metaDataWithSocialAndCreator));
   
-    const response = await axios.post("https://thynktech-server.onrender.com/upload", formData);
+    const response = await axios.post("https://n8n.isg.fi/upload", formData);
     return response.data;
   }
 
@@ -126,6 +125,8 @@ export default function CreateToken() {
       console.log('File uploaded successfully:', response.data);
       return `https://ipfs.io/ipfs/${response.data.IpfsHash}`
     } catch (error: any) {
+      setPending(false)
+      setBtnText('Launch Token')
       console.error('Error uploading file:', error.response?.data || error.message);
     }
   };
