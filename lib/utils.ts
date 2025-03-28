@@ -93,11 +93,15 @@ export function cn(...inputs: ClassValue[]) {
 
 export async function uploadMetadata(logoFile: File, metadata: any) {
   const formData = new FormData();
-  formData.append("file", logoFile);
+  formData.append("file", logoFile as Blob);
   formData.append("metadata", JSON.stringify(metadata));
+  console.log(formData)
   const response = await axios.post(
     "https://thynktech-server.onrender.com/upload",
-    formData
+    formData,
+    {headers: {
+      'Content-Type': 'multipart/form-data',
+    }}
   );
   return response.data;
 }

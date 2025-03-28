@@ -15,13 +15,13 @@ import {
   useConnection,
   useWallet,
 } from "@solana/wallet-adapter-react";
-import { createToken, createToken22, FEE_AMOUNT, PLATFORM_FEE_PUBKEY } from "@/lib/utils";
+import { createToken, createToken22, FEE_AMOUNT, PLATFORM_FEE_PUBKEY, uploadMetadata } from "@/lib/utils";
 import { WalletButton } from "@/components/solana/solana-provider";
 import { transcode } from "buffer";
 import jwt from 'jsonwebtoken';
 import axios from "axios";
 import Arweave from "arweave";
-import { arweaveWallet } from "./constant";
+import { toMetaplexFile, uploadMetadataOperation, uploadMetadataOperationHandler } from "@metaplex-foundation/js";
 
 export default function CreateToken() {
   const arweave = Arweave.init({})
@@ -76,32 +76,52 @@ export default function CreateToken() {
 
   const [pending, setPending] = useState(false)
 
+  const uploadMetadata = async () => {
+    const metaData = {
+      name: tokenData.name,
+      symbol: tokenData.symbol,
+      decimals: tokenData.decimals,
+      supply: tokenData.supply,
+      description: tokenData.description,
+      creator: creatorData
+    }
+
+    const metaDataWithSocial = {
+      name: tokenData.name,
+      symbol: tokenData.symbol,
+      decimals: tokenData.decimals,
+      supply: tokenData.supply,
+      description: tokenData.description,
+      // image: imageUrl,
+      website: tokenData.website,
+      twitter: tokenData.twitter,
+      telegram: tokenData.telegram,
+      discord: tokenData.discord,
+      creator: creatorData
+    }
+    const formData = new FormData();
+    formData.append("file", selectedFile as Blob);
+    formData.append("metadata", JSON.stringify(showSocialLinks ? metaDataWithSocial : metaData));
+  
+    const response = await axios.post("https://thynktech-server.onrender.com/upload", formData);
+    return response.data;
+  }
+
   const handleUploadImage = async () => {
-    // const formData = new FormData();
-    // formData.append('file', selectedFile as Blob);
+
+    const formData = new FormData();
+    formData.append('file', selectedFile as Blob);
 
     try {
-      // const response = await axios.post('https://api.pinata.cloud/pinning/pinFileToIPFS', formData, {
-      //   headers: {
-      //     'Authorization': `Bearer ${process.env.NEXT_PUBLIC_JWT}`,
-      //     'Content-Type': 'multipart/form-data',
-      //   },
-      // });
-
-      let transaction = await arweave.createTransaction({
-        data: await (selectedFile as Blob).arrayBuffer(),
+      const response = await axios.post('https://api.pinata.cloud/pinning/pinFileToIPFS', formData, {
+        headers: {
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_JWT}`,
+          'Content-Type': 'multipart/form-data',
+        },
       });
-  
-      transaction.addTag('Content-Type', selectedFile?.type || 'image/png');
-      console.log(selectedFile?.type)
-      await arweave.transactions.sign(transaction, arweaveWallet);
-  
-      const fileUploadResponse = await arweave.transactions.post(transaction);
 
-      if (fileUploadResponse.status !== 200) throw new Error("File upload failed!");
-
-      console.log('File uploaded successfully:', transaction.id);
-      return `https://arweave.net/${transaction.id}`
+      console.log('File uploaded successfully:', response.data);
+      return `https://ipfs.io/ipfs/${response.data.IpfsHash}`
     } catch (error: any) {
       console.error('Error uploading file:', error.response?.data || error.message);
     }
@@ -109,33 +129,15 @@ export default function CreateToken() {
 
   const handleMetadataUri = async (metadata: any) => {
     try {
-      // const response = await axios.post('https://api.pinata.cloud/pinning/pinJSONToIPFS', metadata, {
-      //   headers: {
-      //     'Authorization': `Bearer ${process.env.NEXT_PUBLIC_JWT}`,
-      //     'Content-Type': 'application/json',
-      //   },
-      // });
-
-      let transaction = await arweave.createTransaction({
-        data: JSON.stringify(metadata),
+      const response = await axios.post('https://api.pinata.cloud/pinning/pinJSONToIPFS', metadata, {
+        headers: {
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_JWT}`,
+          'Content-Type': 'application/json',
+        },
       });
-
-      console.log(transaction)
   
-      transaction.addTag('Content-Type', 'application/json');
-      console.log(selectedFile?.type)
-      await arweave.transactions.sign(transaction, arweaveWallet);
-  
-      // const fileUploadResponse = await arweave.transactions.post(transaction);
-      await arweave.api.post('https://arweave.net', {mode: 'no-cors'})
-
-      // if (fileUploadResponse.status !== 200) throw new Error("Metadata upload failed!");
-
-      console.log('File uploaded successfully:', transaction.id);
-      return `https://arweave.net/${transaction.id}`
-  
-      // console.log('Metadata uploaded successfully:', response.data);
-      // return `https://ipfs.io/ipfs/${response.data.IpfsHash}`
+      console.log('Metadata uploaded successfully:', response.data);
+      return `https://ipfs.io/ipfs/${response.data.IpfsHash}`
     } catch (error: any) {
       console.error('Error uploading metadata:', error.response?.data || error.message);
     }
@@ -185,35 +187,11 @@ export default function CreateToken() {
     }
     if (!selectedFile) {setPending(false); return toast.error("File cannot be empty");}
 
-    const imageUrl = await handleUploadImage();
-    const metaData = {
-      name: data.name,
-      symbol: data.symbol,
-      decimals: data.decimals,
-      supply: data.supply,
-      description: data.description,
-      image: imageUrl,
-      website: data.website,
-      twitter: data.twitter,
-      telegram: data.telegram,
-      discord: data.discord
-    }
-
-    const metaDataWithCreator = {
-      name: data.name,
-      symbol: data.symbol,
-      decimals: data.decimals,
-      supply: data.supply,
-      description: data.description,
-      image: imageUrl,
-      website: data.website,
-      twitter: data.twitter,
-      telegram: data.telegram,
-      discord: data.discord,
-      creator: creatorData
-    }
-    const metaDataUri = await handleMetadataUri(showSocialLinks ? metaDataWithCreator : metaData);
-    if (!metaDataUri) return toast.error("Error uploading metadata");
+    // const imageUrl = await handleUploadImage();
+    
+    // const metaDataUri = await handleMetadataUri(showSocialLinks ? metaDataWithCreator : metaData);
+    const {imageUrl, metadataUri} = await uploadMetadata()
+    if (!metadataUri) {setPending(false); return toast.error("Error uploading metadata");}
     // Determine SOL transfer amount based on checked flags
     const checkedFlags = [
       freezeIsChecked,
@@ -256,7 +234,7 @@ export default function CreateToken() {
       tokenData.decimals,
       tokenData.supply,
       tokenData.description,
-      metaDataUri,
+      metadataUri,
       tokenData.website,
       tokenData.twitter,
       tokenData.telegram,
@@ -269,7 +247,7 @@ export default function CreateToken() {
       updateIsChecked
     );
 
-    const blockhash = (await connection.getLatestBlockhash("finalized"))
+    try {const blockhash = (await connection.getLatestBlockhash("finalized"))
       .blockhash;
     const message = new TransactionMessage({
       payerKey: publicKey,
@@ -278,8 +256,6 @@ export default function CreateToken() {
     }).compileToV0Message();
     const transaction = new VersionedTransaction(message);
     transaction.sign([mintKeypair]);
-    console.log(transaction.serialize().length)
-    setPending(false)
     const signedTx = await signTransaction(transaction);
     const txSignature = await connection.sendTransaction(signedTx);
     console.log("token created successfully", txSignature);
@@ -292,6 +268,10 @@ export default function CreateToken() {
         <p className="text-green-500">View transaction</p>
       </a>
     </div>)
+    } catch (error: any) {
+      setPending(false)
+      console.error(error.message);
+    }
   };
 
   const handleCreateCoin22 = async () => {
@@ -678,7 +658,7 @@ export default function CreateToken() {
             )}
             {!connected && <WalletButton className="flex bg-purple-600 hover:bg-purple-700" />}
           </div>
-          <div className="mt-4 flex justify-center text-white font-medium">Total Fees: &nbsp;<span className="text-gray-500 line-through">{solAmount * 2} SOL</span>&nbsp;{solAmount} SOL</div>
+          <div className="mt-4 flex justify-center text-white font-medium">Total Fees: &nbsp;{solAmount > 0 && <span className="text-gray-500 line-through">{solAmount * 2} SOL</span>}&nbsp;{solAmount} SOL</div>
         </>
       )}
 
