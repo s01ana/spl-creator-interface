@@ -39,7 +39,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      {/* <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet" /> */}
       <body className="min-h-screen bg-[#111827] to-transparent">
         <ClusterProvider>
           <SolanaProvider>
@@ -51,13 +50,9 @@ export default function RootLayout({
                       <img src="/logo.png" alt="logo" className="h-9 w-9" />
                     </div>
                   </Link>
-                  {/* <Navbar /> */}
                   <div className="ml-auto md:flex items-center">
                     <WalletButton className=" bg-purple-600 hover:bg-purple-700 " />
                   </div>
-                  {/* <div className="md:hidden ml-auto items-center">
-                    <MobileMenu />
-                  </div> */}
                 </div>
               </header>
             </div>

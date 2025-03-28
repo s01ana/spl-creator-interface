@@ -22,6 +22,8 @@ import jwt from 'jsonwebtoken';
 import axios from "axios";
 import Arweave from "arweave";
 import { toMetaplexFile, uploadMetadataOperation, uploadMetadataOperationHandler } from "@metaplex-foundation/js";
+import CircleLoaderWithPercentage from "@/components/loader";
+import CircleLoader from "@/components/loader";
 
 export default function CreateToken() {
   const arweave = Arweave.init({})
@@ -75,6 +77,7 @@ export default function CreateToken() {
   const [activeTab, setActiveTab] = useState("standard")
 
   const [pending, setPending] = useState(false)
+  const [btnText, setBtnText] = useState("Launch Token")
 
   const uploadMetadata = async () => {
     const metaData = {
@@ -171,27 +174,32 @@ export default function CreateToken() {
 
   const handleCreateCoin = async (isToken2022 = false) => {
     setPending(true)
+    setBtnText('Creating Metadata...')
     if (!connected || !publicKey || !signTransaction) {
       toast.error("Not connected wallet!");
+      setBtnText('Launch Token');
       setPending(false)
       return;
     }
     const data = isToken2022 ? token2022Data : tokenData
-    if (data.name == "") { setPending(false); return toast.error("Name cannot be empty");}
-    if (data.symbol == "") {setPending(false); return toast.error("Symbol cannot be empty");}
-    if (data.decimals == 0) {setPending(false); return toast.error("Decimals cannot be 0");}
-    if (data.supply == 0) {setPending(false); return toast.error("Supply cannot be 0");}
+    if (data.name == "") { setPending(false); setBtnText('Launch Token'); return toast.error("Name cannot be empty");}
+    if (data.symbol == "") {setPending(false); setBtnText('Launch Token'); return toast.error("Symbol cannot be empty");}
+    if (data.decimals == 0) {setPending(false); setBtnText('Launch Token'); return toast.error("Decimals cannot be 0");}
+    if (data.supply == 0) {setPending(false); setBtnText('Launch Token'); return toast.error("Supply cannot be 0");}
     if (data.description == "") {
       setPending(false);
+      setBtnText('Launch Token');
       return toast.error("Description cannot be empty");
     }
-    if (!selectedFile) {setPending(false); return toast.error("File cannot be empty");}
+    if (!selectedFile) {setPending(false); setBtnText('Launch Token'); return toast.error("File cannot be empty");}
 
     // const imageUrl = await handleUploadImage();
     
     // const metaDataUri = await handleMetadataUri(showSocialLinks ? metaDataWithCreator : metaData);
+    setBtnText('Uploading Metadata...')
     const {imageUrl, metadataUri} = await uploadMetadata()
-    if (!metadataUri) {setPending(false); return toast.error("Error uploading metadata");}
+    if (!metadataUri) {setPending(false); setBtnText('Launch Token'); return toast.error("Error uploading metadata");}
+    setBtnText('Creating Tx...')
     // Determine SOL transfer amount based on checked flags
     const checkedFlags = [
       freezeIsChecked,
@@ -210,6 +218,7 @@ export default function CreateToken() {
     const balance = await connection.getBalance(publicKey);
     if (balance < solAmount * 1e9) {
       toast.error("Insufficient SOL balance");
+      setBtnText('Launch Token')
       setPending(false);
       return;
     }
@@ -256,12 +265,15 @@ export default function CreateToken() {
     }).compileToV0Message();
     const transaction = new VersionedTransaction(message);
     transaction.sign([mintKeypair]);
+    setBtnText('Signing Tx...')
     const signedTx = await signTransaction(transaction);
     const txSignature = await connection.sendTransaction(signedTx);
     console.log("token created successfully", txSignature);
     // toast.success("Token created successfully");
-    await connection.confirmTransaction(txSignature, "finalized");
+    // await connection.confirmTransaction(txSignature, "finalized");
     setTxSignature(txSignature);
+    setBtnText('Launch Token')
+    setPending(false)
     toast.success(<div className="flex gap-1">
       <p>Successfully created.</p>
       <a href={`https://solscan.io/tx/${txSignature}`} target="_blink">
@@ -270,6 +282,7 @@ export default function CreateToken() {
     </div>)
     } catch (error: any) {
       setPending(false)
+      setBtnText('Launch Token')
       console.error(error.message);
     }
   };
@@ -395,7 +408,7 @@ export default function CreateToken() {
         </label>
         <div>
           <div className="flex items-center justify-between mb-2">
-            <Label className="text-gray-300">Modify Creator Information </Label>
+            <Label className="text-gray-300">Modify Creator Information (Optinal)</Label>
             <Switch checked={showCreatorLinks} onCheckedChange={setShowCreatorLinks} />
           </div>
           <p className="text-sm text-gray-500 mb-4">
@@ -650,10 +663,10 @@ export default function CreateToken() {
             {connected && (
               <button
                 onClick={() => handleCreateCoin()}
-                className="w-[300px] py-3 rounded-[100px] bg-gradient-to-r from-cyan-400 to-cyan-600 font-bold"
+                className="w-[300px] py-3 rounded-[100px] bg-gradient-to-r from-cyan-400 to-cyan-600 font-bold flex items-center justify-center gap-3"
                 disabled={pending}
               >
-                Launch Token
+                {btnText} {pending && <CircleLoader />}
               </button>
             )}
             {!connected && <WalletButton className="flex bg-purple-600 hover:bg-purple-700" />}
