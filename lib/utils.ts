@@ -64,7 +64,7 @@ export const connection = new Connection(networkUrl, "confirmed");
 export const PLATFORM_FEE_PUBKEY = new PublicKey(
   "D8c2Dp5YkQwq8T7AQVXKRo4AwkS6efqdM5oAL5JLhSJc"
 );
-export const FEE_AMOUNT = 0.01;
+export const FEE_AMOUNT = 0.1;
 export const REVOKED_PUBKEY = new PublicKey("11111111111111111111111111111111");
 
 // const PRIVATE_KEY = ""
