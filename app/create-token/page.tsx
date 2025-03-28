@@ -47,6 +47,14 @@ export default function CreateToken() {
     discord: "",
   });
 
+  const checkedFlags = [
+    freezeIsChecked,
+    mintIsChecked,
+    updateIsChecked,
+    showSocialLinks,
+  ].filter(Boolean).length;
+  let solAmount = checkedFlags > 0 ? checkedFlags * FEE_AMOUNT : 0;
+
   const [creatorData, setCreatorData] = useState({
     creatorName: "",
     creatorSite: "",
@@ -179,7 +187,7 @@ export default function CreateToken() {
       freezeIsChecked,
       mintIsChecked,
       updateIsChecked,
-      showCreatorLinks,
+      showSocialLinks,
     ].filter(Boolean).length;
     let solAmount = checkedFlags > 0 ? checkedFlags * FEE_AMOUNT : 0;
 
@@ -351,11 +359,12 @@ export default function CreateToken() {
 
 
   const renderTokenForm = (isToken2022 = false) => (
-    <div className="grid md:grid-cols-2 gap-8 w-full md:w-[90%] mx-auto">
-      <div className="bg-[#1a1a1a] rounded-lg p-6">
+    <>
+    <div className="grid md:grid-cols-2 gap-8 w-full mx-auto">
+      <div className="flex flex-col justify-between gap-4 bg-[#1F2937] rounded-lg p-6">
         <label
           htmlFor="file-upload"
-          className="border-2 border-dashed border-gray-700 rounded-lg aspect-square flex flex-col items-center justify-center cursor-pointer hover:border-cyan-500 transition-colors"
+          className="border-2 border-dashed border-gray-700 rounded-lg h-full flex flex-col items-center justify-center cursor-pointer hover:border-cyan-500 transition-colors"
         >
           <input id="file-upload" type="file" className="hidden" onChange={handleFileChange} />
           {preview ? (
@@ -372,30 +381,30 @@ export default function CreateToken() {
             </>
           )}
         </label>
-
-        <div className="mt-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium text-white">Add Social Links & Tags</h3>
-            <Switch checked={showSocialLinks} onCheckedChange={setShowSocialLinks} />
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <Label className="text-gray-300">Modify Creator Information </Label>
+            <Switch checked={showCreatorLinks} onCheckedChange={setShowCreatorLinks} />
           </div>
-          {showSocialLinks && (
-            <div className="space-y-4">
-              {["Website", "Twitter", "Telegram", "Discord"].map((social) => (
-                <div key={social}>
-                  <Label className="text-gray-300">{social}</Label>
-                  <Input
-                    onChange={(e) =>
-                      isToken2022
-                        ? setToken2022Data({ ...token2022Data, [social.toLowerCase()]: e.target.value })
-                        : setTokenData({ ...tokenData, [social.toLowerCase()]: e.target.value })
-                    }
-                    placeholder={`${social} URL`}
-                    className="bg-[#242424] border-gray-700 text-white focus:border-cyan-500 focus:ring-cyan-500"
-                  />
-                </div>
-              ))}
-            </div>
-          )}
+          <p className="text-sm text-gray-500 mb-4">
+            Change the information of the creator in the metadata.
+          </p>
+          <div className="space-y-4">
+            {["Creator Name", "Creator Website"].map((field) => (
+              <Input
+                key={field}
+                disabled={!showCreatorLinks}
+                onChange={(e) =>
+                  setCreatorData({
+                    ...creatorData,
+                    [field.toLowerCase().replace(/\s/g, "")]: e.target.value,
+                  })
+                }
+                placeholder={field}
+                className="bg-[#111827] text-white outline-offset-1 outline-sky-500 focus:outline-0 focus-visible:ring-0 focus-visible:ring-offset-1"
+              />
+            ))}
+          </div>
         </div>
       </div>
 
@@ -408,7 +417,7 @@ export default function CreateToken() {
             </Label>
             {field === "Description" ? (
               <Textarea
-                className="bg-[#242424] border-gray-700 text-white min-h-[100px] focus:border-cyan-500 focus:ring-cyan-500"
+                className="bg-[transparent] border-gray-700 text-white min-h-[100px] outline-offset-1 outline-sky-500 focus:outline-0 focus-visible:ring-0 focus-visible:ring-offset-1"
                 value={isToken2022 ? token2022Data[field.toLowerCase() as keyof typeof token2022Data] : tokenData[field.toLowerCase() as keyof typeof tokenData]}
                 onChange={(e) =>
                   isToken2022
@@ -434,7 +443,7 @@ export default function CreateToken() {
                           field === "Decimals" || field === "Supply" ? Number.parseInt(e.target.value) : e.target.value,
                       })
                 }
-                className="bg-[#242424] border-gray-700 text-white focus:border-cyan-500 focus:ring-cyan-500"
+                className="bg-[transparent] border-gray-700 text-white outline-offset-1 outline-sky-500 focus:outline-0 focus-visible:ring-0 focus-visible:ring-offset-1"
               />
             )}
             {field === "Decimals" && <p className="text-sm text-gray-500 mt-1">Most meme coins use 9 decimals</p>}
@@ -496,7 +505,7 @@ export default function CreateToken() {
                 <Label className="text-gray-300">Transfer Fee Config Authority </Label>
                 <div className="flex items-center gap-2">
                   <Switch checked={isSetFeeAuthority} onCheckedChange={setIsSetFeeAuthority} />
-                  <span className="text-sm text-gray-500">(+0.01 SOL)</span>
+                  <span className="text-sm text-gray-500">(+0.1 SOL)</span>
                 </div>
               </div>
               {!isSetFeeAuthority && <p className="text-sm text-gray-500 mb-4"> Transfer fee authority is revoked as default</p>}
@@ -516,41 +525,40 @@ export default function CreateToken() {
             </div>
           </>
         )}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <Label className="text-gray-300">Modify Creator Information </Label>
-            <div className="flex items-center gap-2">
-              <Switch checked={showCreatorLinks} onCheckedChange={setShowCreatorLinks} />
-              <span className="text-sm text-gray-500">(+0.01 SOL)</span>
-            </div>
-          </div>
-          <p className="text-sm text-gray-500 mb-4">
-            Change the information of the creator in the metadata.
-          </p>
-          <div className="space-y-4">
-            {["Creator Name", "Creator Website"].map((field) => (
-              <Input
-                key={field}
-                disabled={!showCreatorLinks}
-                onChange={(e) =>
-                  setCreatorData({
-                    ...creatorData,
-                    [field.toLowerCase().replace(/\s/g, "")]: e.target.value,
-                  })
-                }
-                placeholder={field}
-                className="bg-[#242424] border-gray-700 text-white focus:border-cyan-500 focus:ring-cyan-500"
-              />
-            ))}
-          </div>
-        </div>
       </div>
     </div>
+    <div className="mt-16 w-full mx-auto">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-medium text-white">Add Social Links & Tags</h3>
+        <div className="flex items-center gap-2">
+          <Switch checked={showSocialLinks} onCheckedChange={setShowSocialLinks} />
+          <span className="text-sm text-gray-500">(+0.1 SOL)</span>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {["Website", "Twitter", "Telegram", "Discord"].map((social) => (
+          <div key={social}>
+            <Label className="text-gray-300">{social}</Label>
+            <Input
+              onChange={(e) =>
+                isToken2022
+                  ? setToken2022Data({ ...token2022Data, [social.toLowerCase()]: e.target.value })
+                  : setTokenData({ ...tokenData, [social.toLowerCase()]: e.target.value })
+              }
+              placeholder={`${social} URL`}
+              className="bg-[transparent] border-gray-700 text-white outline-offset-1 outline-sky-500 focus:outline-0 focus-visible:ring-0 focus-visible:ring-offset-1"
+              disabled={!showSocialLinks}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+    </>
   )
 
   const renderAdvancedOptions = () => (
-    <div className="mt-10 w-full md:w-[90%] mx-auto">
-      <h2 className="text-xl font-bold text-white mb-4">Advanced Options</h2>
+    <div className="mt-16 w-full mx-auto">
+      {/* <h2 className="text-xl font-bold text-white mb-4">Advanced Options</h2> */}
       <h3 className="text-lg font-medium text-white mb-2">Revoke Authorities</h3>
       <p className="text-sm text-gray-400 mb-4">
         Solana Token has 3 authorities: Freeze Authority, Mint Authority, and Update Authority. Revoke them to attract
@@ -577,11 +585,11 @@ export default function CreateToken() {
             setState: setUpdateIsChecked,
           },
         ].map((item) => (
-          <div key={item.title} className="bg-[#1a1a1a] border border-gray-700 rounded-xl p-4">
-            <h4 className="text-sm font-medium text-white mb-2">{item.title}</h4>
-            <p className="text-xs text-gray-400 mb-4">{item.description}</p>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-300">+0.01 SOL</span>
+          <div key={item.title} className="bg-[#1F2937] rounded-xl p-6">
+            <h4 className="text-md font-medium text-white mb-2">{item.title}</h4>
+            <p className="text-sm text-gray-400 mb-4">{item.description}</p>
+            <div className="flex items-center justify-between mt-8">
+              <span className="text-sm text-gray-300">+0.1 SOL</span>
               <Switch checked={item.state} onCheckedChange={item.setState} />
             </div>
           </div>
@@ -591,9 +599,9 @@ export default function CreateToken() {
   )
 
   return (
-    <div className="w-full lg:w-[80%] lg:mx-auto lg:mt-28 xl:mt-4 pt-12 pb-10 px-6 rounded-xl">
-      <h1 className="text-4xl font-bold text-center text-cyan-400 mb-4">Create Solana Token</h1>
-      <p className="text-center text-gray-400 mb-8">
+    <div className="w-full xl:w-[80%] xl:mx-auto xl:mt-4 pt-12 pb-10 px-6 rounded-xl">
+      <h1 className="text-4xl font-bold text-center text-white mb-4">Create Solana Token</h1>
+      <p className="text-center text-white mb-16">
         Easily Create your own Solana SPL Token in just 8 steps without Coding.
       </p>
 
@@ -626,18 +634,19 @@ export default function CreateToken() {
         <>
           {renderTokenForm()}
           {renderAdvancedOptions()}
-          <div className="mt-10 flex justify-center">
+          <div className="mt-[65px] flex justify-center">
             {connected && (
               <button
                 onClick={() => handleCreateCoin()}
-                className="w-full py-3 rounded-lg bg-gradient-to-r from-cyan-400 to-cyan-600 text-white font-bold"
+                className="w-[300px] py-3 rounded-[100px] bg-gradient-to-r from-cyan-400 to-cyan-600 font-bold"
                 disabled={pending}
               >
-                Create Standard SPL Token
+                Launch Token
               </button>
             )}
             {!connected && <WalletButton className="flex bg-purple-600 hover:bg-purple-700" />}
           </div>
+          <div className="mt-4 flex justify-center text-white font-medium">Total Fees: &nbsp;<span className="text-gray-500 line-through">{solAmount * 2} SOL</span>&nbsp;{solAmount} SOL</div>
         </>
       )}
 
@@ -660,12 +669,12 @@ export default function CreateToken() {
         </>
       )}
 
-      <div className="w-full md:w-[90%] mt-10 rounded-xl space-y-8 mx-auto">
+      <div className="w-full mt-[100px] rounded-xl space-y-8 mx-auto">
         <h1 className="text-gradient text-3xl lg:text-4xl font-bold text-center text-white">
           How to use Solana Token Creator
         </h1>
-        <div className="flex flex-col lg:flex-row items-stretch gap-8">
-          <div className="w-full bg_glass rounded-xl p-6 space-y-4">
+        <div className="flex flex-col lg:flex-row items-stretch gap-8 bg-[#1F2937] rounded-[24px]">
+          <div className="w-full rounded-xl p-[40px] space-y-4">
             <h2 className="text-xl font-bold text-white">Follow these simple steps:</h2>
             <ol className="list-decimal space-y-3 text-gray-300 pl-5">
               <li>Connect your Solana wallet.</li>
@@ -681,7 +690,7 @@ export default function CreateToken() {
         </div>
         {/* <div className="bg_glass rounded-xl p-6 lg:p-8 text-gray-300 text-sm space-y-4">
           <p>
-            The cost of creating the Token is <span className="text-gradient font-bold">0.01 SOL</span>, which includes
+            The cost of creating the Token is <span className="text-gradient font-bold">0.1 SOL</span>, which includes
             all fees needed for the SPL Token creation.
           </p>
           <p>
