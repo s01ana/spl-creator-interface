@@ -350,16 +350,12 @@ export const createToken = async (
       programId: TOKEN_PROGRAM_ID,
     })
 
-    console.log("createAccountInst", createAccountInst)
-
     const createInitMintInst = createInitializeMintInstruction(
       mint,
       decimals,
       walletPubkey,
       isFreezeRevoked ? null : walletPubkey
     )
-
-    console.log("createInitMintInst", createInitMintInst)
 
     const destinationAccount = await getAssociatedTokenAddress(
       mint,

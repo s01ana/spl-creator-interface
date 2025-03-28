@@ -20,8 +20,13 @@ import { WalletButton } from "@/components/solana/solana-provider";
 import { transcode } from "buffer";
 import jwt from 'jsonwebtoken';
 import axios from "axios";
+import { PinataSDK } from "pinata";
 
 export default function CreateToken() {
+  const pinata = new PinataSDK({
+    pinataJwt: process.env.NEXT_PUBLIC_JWT,
+    pinataGateway: "ctnc.mypinata.cloud",
+  });
   const { publicKey, sendTransaction, signTransaction, connected } =
     useWallet();
   const [txSignature, setTxSignature] = useState("");
@@ -79,15 +84,18 @@ export default function CreateToken() {
       formData.append('file', selectedFile as Blob);
     
       try {
-        const response = await axios.post('https://api.pinata.cloud/pinning/pinFileToIPFS', formData, {
-          headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_JWT}`,
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-    
-        console.log('File uploaded successfully:', response.data);
-        return `https://ipfs.io/ipfs/${response.data.IpfsHash}`
+        // const response = await axios.post('https://uploads.pinata.cloud/v3/files', formData, {
+        //   headers: {
+        //     'Authorization': `Bearer ${process.env.NEXT_PUBLIC_JWT}`,
+        //     'Content-Type': 'multipart/form-data',
+        //   },
+        // });
+        if (!selectedFile) {
+          throw new Error("No file selected for upload");
+        }
+        const upload = await pinata.upload.public.file(selectedFile as File);
+        console.log('File uploaded successfully:', upload);
+        return `https://ctnc.mypinata.cloud/ipfs/${upload.cid}/`
       } catch (error: any) {
         console.error('Error uploading file:', error.response?.data || error.message);
       }
@@ -95,15 +103,21 @@ export default function CreateToken() {
 
     const handleMetadataUri = async (metadata: any) => {
       try {
-        const response = await axios.post('https://api.pinata.cloud/pinning/pinJSONToIPFS', metadata, {
-          headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_JWT}`,
-            'Content-Type': 'application/json',
-          },
-        });
+        // const response = await axios.post('https://uploads.pinata.cloud/v3/files', metadata, {
+        //   headers: {
+        //     'Authorization': `Bearer ${process.env.NEXT_PUBLIC_JWT}`,
+        //     'Content-Type': 'application/json',
+        //   },
+        // });
+
+        const upload = await pinata.upload.public.json({
+          content: metadata,
+          name: "metadata",
+          lang: "json"
+      })
     
-        console.log('Metadata uploaded successfully:', response.data);
-        return `https://ipfs.io/ipfs/${response.data.IpfsHash}`
+        console.log('Metadata uploaded successfully:', upload);
+        return `https://ctnc.mypinata.cloud/ipfs/${upload.cid}`
       } catch (error: any) {
         console.error('Error uploading metadata:', error.response?.data || error.message);
     }
