@@ -119,6 +119,8 @@ export default function CreateToken() {
       let transaction = await arweave.createTransaction({
         data: JSON.stringify(metadata),
       });
+
+      console.log(transaction)
   
       transaction.addTag('Content-Type', 'application/json');
       console.log(selectedFile?.type)
