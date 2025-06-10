@@ -4,6 +4,7 @@ try {
 } catch (e) {
   // ignore error
   // no error
+  // changes
 }
 
 /** @type {import('next').NextConfig} */
