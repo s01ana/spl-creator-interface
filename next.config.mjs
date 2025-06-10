@@ -3,7 +3,7 @@ try {
   userConfig = await import('./v0-user-next.config')
 } catch (e) {
   // ignore error
-  //
+  // no error
 }
 
 /** @type {import('next').NextConfig} */
